@@ -1,0 +1,204 @@
+{
+  "experiment": "ddpm_arbitrage_oos",
+  "family": "diffusion",
+  "paper_model": "DDPM_arbitrage",
+  "_note": "eps-MSE + the three differentiable static-arbitrage penalties (calendar / vertical spread / butterfly). lambda_spread is the weight the original code called lambda_bull.",
+  "paths": {
+    "tensor_dir": "${IVS_DATA_ROOT:-data}/tensors_oos",
+    "clean_dir": "${IVS_DATA_ROOT:-data}/cleaning_oos",
+    "raw_dir": "${IVS_DATA_ROOT:-data}/raw",
+    "artifact_dir": "${IVS_ARTIFACT_ROOT:-artifacts}/ddpm_arbitrage",
+    "ckpt_dir": "${IVS_ARTIFACT_ROOT:-artifacts}/ddpm_arbitrage/checkpoints",
+    "norm_dir": "${IVS_ARTIFACT_ROOT:-artifacts}/ddpm_arbitrage/normalizer",
+    "sample_dir": "${IVS_ARTIFACT_ROOT:-artifacts}/ddpm_arbitrage/samples_oos",
+    "eval_output_dir": "${IVS_ARTIFACT_ROOT:-artifacts}/ddpm_arbitrage/evaluate_oos_outputs"
+  },
+  "reproducibility": {
+    "global_seed": 20260616
+  },
+  "universe": {
+    "n_candidates": 100,
+    "n_select": 50,
+    "select_seed": 20260611,
+    "min_valid_days": 250
+  },
+  "tickers": [
+    "AAPL",
+    "ABBV",
+    "ADBE",
+    "ADI",
+    "AMGN",
+    "AMT",
+    "AXP",
+    "BA",
+    "BAC",
+    "BKNG",
+    "BSX",
+    "CAT",
+    "COP",
+    "COST",
+    "CRM",
+    "CVX",
+    "DHR",
+    "GILD",
+    "HCA",
+    "IBM",
+    "INTC",
+    "INTU",
+    "ISRG",
+    "JNJ",
+    "JPM",
+    "KLAC",
+    "LLY",
+    "LMT",
+    "LOW",
+    "MA",
+    "MCD",
+    "META",
+    "MS",
+    "NEE",
+    "NOW",
+    "PEP",
+    "PG",
+    "PGR",
+    "SCHW",
+    "SPGI",
+    "SYK",
+    "TMO",
+    "TSLA",
+    "TXN",
+    "UBER",
+    "UNH",
+    "UPS",
+    "V",
+    "VRTX",
+    "WMT"
+  ],
+  "_tickers_note": "The 50 out-of-sample tickers (zero overlap with training).",
+  "data_cleaning": {
+    "min_mid_price": 0.05,
+    "iv_low": 0.05,
+    "iv_high": 2.0,
+    "max_iv_spread": 0.5,
+    "mid_breakpoint": 0.5,
+    "rel_spread_max_high_mid": 0.5,
+    "abs_spread_max_low_mid": 0.1,
+    "min_open_interest": 1,
+    "delta_abs_low": 0.05,
+    "delta_abs_high": 0.95,
+    "ttm_days_low": 1,
+    "vega_min": 0.0,
+    "split_log_ret_abs_threshold": 0.5
+  },
+  "surface_grid": {
+    "surface_m": 11,
+    "surface_t": 9,
+    "m_grid": [
+      0.6,
+      0.7,
+      0.8,
+      0.9,
+      0.95,
+      1.0,
+      1.05,
+      1.1,
+      1.2,
+      1.3,
+      1.4
+    ],
+    "tau_grid_years": [
+      0.003968253968253968,
+      0.019230769230769232,
+      0.038461538461538464,
+      0.08333333333333333,
+      0.16666666666666666,
+      0.25,
+      0.5,
+      0.75,
+      1.0
+    ]
+  },
+  "split": {
+    "train_start": "2010-01-01",
+    "train_end": "2022-12-31",
+    "test_start": "2023-01-01",
+    "test_end": "2024-12-31"
+  },
+  "bandwidth": {
+    "kernel_h_m": 0.01,
+    "kernel_h_tau": 0.046,
+    "search_low": 0.002,
+    "search_high": 0.1,
+    "search_step": 0.002,
+    "search_first_n_days": 100,
+    "search_seed": 20260611
+  },
+  "rates": {
+    "source": "parity",
+    "fallback": "dgs3mo",
+    "parity_min_pairs": 3,
+    "parity_r_low": -0.05,
+    "parity_r_high": 0.25
+  },
+  "features": {
+    "rv_window": 21
+  },
+  "model": {
+    "cond_extra_dim": 3
+  },
+  "diffusion": {
+    "num_timesteps": 1000,
+    "beta_schedule": "cosine",
+    "hidden_dim": 256,
+    "num_blocks": 8,
+    "time_emb_dim": 128,
+    "dropout": 0.0,
+    "ema_decay": 0.999,
+    "use_ema": true
+  },
+  "training": {
+    "batch_size": 4096,
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "epochs": 1000,
+    "gradient_clip": 1.0,
+    "seed": 20260616,
+    "log_every_steps": 50,
+    "ckpt_every_epochs": 250,
+    "world_size": 4,
+    "use_amp": true,
+    "amp_dtype": "bfloat16"
+  },
+  "penalty_calibration": {
+    "ref_epochs": 25,
+    "smoothness_target_ratio": 1.0,
+    "arbitrage_target_ratio": 1.0,
+    "clamp_norm": 5.0
+  },
+  "generation": {
+    "samples_per_state": 1000,
+    "batch_states": 512
+  },
+  "reweight": {
+    "fixed_beta": 50.0,
+    "kl_constant": 500.0
+  },
+  "hardware": {
+    "n_jobs_fraction": 0.9,
+    "ticker_jobs": 24,
+    "parquet_compression": "zstd",
+    "parquet_compression_level": 6
+  },
+  "versions": {
+    "arbitrage": {
+      "use_smoothness": false,
+      "use_arbitrage": true,
+      "smoothness_mode": "logiv_fd",
+      "lambda_m": 0.0,
+      "lambda_tau": 0.0,
+      "lambda_calendar": 0.0,
+      "lambda_spread": 0.0,
+      "lambda_butterfly": 0.0
+    }
+  }
+}

@@ -1,0 +1,13 @@
+# Run artifacts (checkpoints, generated scenarios, logs, evaluation outputs)
+artifacts/
+data/
+*.pt
+*.npz
+logs/
+*.png
+*.pdf
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
